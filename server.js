@@ -10,16 +10,25 @@ var redis = require('redis');
 var client = redis.createClient(6379);
 
 app.get('/update:lastTick', function updater(req, res) {
-  console.log(req.params.lastTick);
-  if(req.params.lastTick == client.llen('tick') -1){
-    res.sendStatus(204);
-    res.end();
-  }
-  else{
-    console.log(client.lrange('ticks', req.params.lastTick +1, -1));
-    res.json(client.lrange('ticks', req.params.lastTick +1, -1));
-    res.end();
-  }
+  client.llen('ticks', function (err,reply) {
+    if (err) {
+      console.log(err);
+    }
+    if(req.params.lastTick == reply){
+      res.sendStatus(204);
+      res.end();
+    }
+    else{
+      client.lrange('ticks', req.params.lastTick, -1, function (err, reply) {
+        if (err) {
+          console.log(err);
+        }
+        var responseObject = {'ticks' : reply}
+        res.json(responseObject);
+        res.end();
+      });
+    }
+  });
 });
 
 app.post('/tick', function newTickAdder(req, res) {
