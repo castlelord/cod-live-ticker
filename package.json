@@ -5,9 +5,9 @@
   "dependencies" : {
     "express" : "4.13.3",
     "body-parser" : "1.14.2",
-    "redis" : "2.6.1"
+    "redis" : "2.5.0"
   },
   "engines" : {
-    "node" : ">=5.4.1" 
+    "node" : ">=5.4.1"
   }
 }
