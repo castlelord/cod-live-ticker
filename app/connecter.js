@@ -30,7 +30,9 @@ exports.getTicks = function (lastTick, next) {
 
 // adds a tick to th db
 exports.addTick = function (tick) {
-  client.rpush('ticks',tick);
+  client.rpush('ticks',tick , function (err) {
+    console.log(err);
+  });
   return true;
 };
 
