@@ -1,10 +1,16 @@
 var expect = require('chai').expect;
 var request = require('request');
+var connecter = require('../app/connecter.js');
 
-describe('HTTP-Server', function () {
 
-  describe('POST /tick', function () {
-    it('creates a new tick', function () {
+describe('HTTP-Server:', function () {
+
+  describe('POST /tick:', function () {
+
+    var responseStatusCode;
+    var newTick;
+
+    before(function (done) {
       var url = 'http://localhost:3000/tick';
       var requestData = {'post' : 'text'};
 
@@ -13,27 +19,66 @@ describe('HTTP-Server', function () {
         'method' : 'POST',
         'json' : requestData
       }, function (error, response) {
-        expect(response.statusCode).to.equal(201);
+          responseStatusCode = response.statusCode;
+
+          connecter.getTicks(0, function (result) {
+            newTick = result;
+            done();
+          });
       });
     });
+
+    it('sends status code 201', function () {
+      expect(responseStatusCode).to.equal(201);
+    })
+
+    it('creates a new tick', function () {
+      expect(newTick).to.deep.equal(['text']);
+    });
+
+
   });
 
-  describe('GET /update:lastTick', function () {
-    it('sends new ticks if there are some', function () {
-      var url = 'http://localhost:3000/update0';
+  describe('GET /update:lastTick:', function () {
 
-      request(url, function (error, response, body) {
-        expect(body).to.equal(['text']);
-        expect(response.statusCode).to.equal(200);
-      });
-    });
+    var responsData;
+    var possitivResponseCode;
+    var negativeResponseCode;
 
-    it('sends status code 204 wenn there are no new ticks', function () {
-      var url = 'http://localhost:3000/update4';
+    before(function (done) {
 
-      request(url, function (error, response) {
-        expect(response.statusCode).to.equal(204);
+      var urlzero = 'http://localhost:3000/update0';
+
+      request(urlzero, function (error, response, body) {
+        responsData = JSON.parse(body);
+        possitivResponseCode = response.statusCode;
+        done();
       });
     })
+
+    it('sends new ticks if there are some', function () {
+      expect(responsData).to.deep.equal(['text']);
+    });
+
+    it('sends status code 200 wenn there are new ticks', function () {
+      expect(possitivResponseCode).to.equal(200);
+    })
+
+    before(function (done) {
+      var urlfour = 'http://localhost:3000/update4';
+
+      request(urlfour, function (error, response) {
+        negativeResponseCode = response.statusCode;
+        done();
+      });
+    })
+
+    it('sends status code 204 wenn there are no new ticks', function () {
+      expect(negativeResponseCode).to.equal(204);
+    });
+
+    after(function () {
+      connecter.removeFirstTick();
+    });
   });
-})
+});

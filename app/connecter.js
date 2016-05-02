@@ -7,7 +7,6 @@ var client = redis.createClient(process.env.PORT || 6379);
 exports.checkForNewTicks = function (lastTick, next) {
   client.llen('ticks', function (err,reply) {
     if (err) {
-      console.log(err);
     }
     if(lastTick >= reply){
       next(false);
@@ -22,7 +21,6 @@ exports.checkForNewTicks = function (lastTick, next) {
 exports.getTicks = function (lastTick, next) {
   client.lrange('ticks', lastTick, -1, function (err, reply) {
     if (err) {
-      console.log(err);
     }
     next(reply);
   });
@@ -31,7 +29,9 @@ exports.getTicks = function (lastTick, next) {
 // adds a tick to th db
 exports.addTick = function (tick) {
   client.rpush('ticks',tick , function (err) {
-    console.log(err);
+    if(err) {
+      console.log(err);
+    }
   });
   return true;
 };
